@@ -55,4 +55,15 @@ class SettingsViewModelTest {
         }
         verify(workScheduler).triggerImmediateSync()
     }
+
+    @Test
+    fun `saveAndRegister normalizes server URL without scheme`() = runTest(dispatcher) {
+        whenever(registerDeviceUseCase()).thenReturn(Result.success(Unit))
+        val viewModel = SettingsViewModel(settingsStore, registerDeviceUseCase, workScheduler)
+
+        viewModel.saveAndRegisterDevice("103.236.97.248:7890", "Android Phone")
+        advanceUntilIdle()
+
+        verify(settingsStore).updateServerUrl("http://103.236.97.248:7890")
+    }
 }

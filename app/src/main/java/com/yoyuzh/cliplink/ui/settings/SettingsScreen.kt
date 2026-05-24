@@ -46,7 +46,8 @@ fun SettingsScreen(
     viewModel: SettingsViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
-    val settings by viewModel.settingsFlow.collectAsState()
+    val uiState by viewModel.uiState.collectAsState()
+    val settings = uiState.settings
 
     // Live-observe accessibility state
     var accessibilityEnabled by remember { mutableStateOf(isClipLinkAccessibilityEnabled(context)) }
@@ -112,9 +113,28 @@ fun SettingsScreen(
                 onClick = {
                     viewModel.saveAndRegisterDevice(serverUrlDraft, deviceNameDraft)
                 },
+                enabled = !uiState.isRegistering,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text(if (settings.deviceId.isBlank()) "注册设备" else "重新注册")
+                Text(
+                    when {
+                        uiState.isRegistering -> "注册中..."
+                        settings.deviceId.isBlank() -> "注册设备"
+                        else -> "重新注册"
+                    }
+                )
+            }
+            uiState.registrationResult?.let { result ->
+                Spacer(Modifier.height(4.dp))
+                Text(
+                    result,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = if (result.startsWith("注册成功")) {
+                        MaterialTheme.colorScheme.primary
+                    } else {
+                        MaterialTheme.colorScheme.error
+                    }
+                )
             }
         }
 

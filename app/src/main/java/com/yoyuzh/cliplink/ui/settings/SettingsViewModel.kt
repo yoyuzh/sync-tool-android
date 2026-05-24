@@ -74,7 +74,7 @@ class SettingsViewModel @Inject constructor(
 
     fun saveAndRegisterDevice(serverUrl: String, deviceName: String) {
         viewModelScope.launch {
-            settingsStore.updateServerUrl(serverUrl.trim())
+            settingsStore.updateServerUrl(normalizeServerUrl(serverUrl))
             settingsStore.updateDeviceName(deviceName.trim().ifBlank { "My Android" })
             registerWithCurrentSettings()
         }
@@ -91,5 +91,16 @@ class SettingsViewModel @Inject constructor(
             } else {
                 "注册失败: ${result.exceptionOrNull()?.message}"
             }
+    }
+
+    private fun normalizeServerUrl(url: String): String {
+        val trimmed = url.trim()
+        if (trimmed.isBlank()) return ""
+        if (trimmed.startsWith("http://", ignoreCase = true) ||
+            trimmed.startsWith("https://", ignoreCase = true)
+        ) {
+            return trimmed
+        }
+        return "http://$trimmed"
     }
 }
