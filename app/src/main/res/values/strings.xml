@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">ClipBridge</string>
+    <string name="accessibility_service_description">ClipBridge uses accessibility focus changes to show local clipboard assistance when enabled.</string>
+</resources>
