@@ -20,6 +20,24 @@ val hasReleaseSigningConfig = listOf(
     releaseKeyAlias,
     releaseKeyPassword
 ).all { !it.isNullOrBlank() }
+val allowUnsignedRelease = secretProperty("CLIPLINK_ALLOW_UNSIGNED_RELEASE")
+    ?.toBooleanStrictOrNull() == true
+
+val validateClipLinkReleaseSigning by tasks.registering {
+    group = "verification"
+    description = "Fails release builds unless ClipLink release signing is configured."
+
+    doLast {
+        if (!hasReleaseSigningConfig && !allowUnsignedRelease) {
+            throw GradleException(
+                "Release signing is not configured. Set CLIPLINK_RELEASE_STORE_FILE, " +
+                    "CLIPLINK_RELEASE_STORE_PASSWORD, CLIPLINK_RELEASE_KEY_ALIAS, and " +
+                    "CLIPLINK_RELEASE_KEY_PASSWORD, or set CLIPLINK_ALLOW_UNSIGNED_RELEASE=true " +
+                    "for local unsigned verification."
+            )
+        }
+    }
+}
 
 android {
     namespace = "com.yoyuzh.cliplink"
@@ -29,8 +47,8 @@ android {
         applicationId = "com.yoyuzh.cliplink"
         minSdk = 26
         targetSdk = 36
-        versionCode = 1
-        versionName = "0.1.0"
+        versionCode = 2
+        versionName = "0.1.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -78,6 +96,10 @@ android {
     testOptions {
         unitTests.isIncludeAndroidResources = true
     }
+}
+
+tasks.matching { it.name == "preReleaseBuild" }.configureEach {
+    dependsOn(validateClipLinkReleaseSigning)
 }
 
 ksp {

@@ -32,8 +32,12 @@ CLIPLINK_RELEASE_KEY_PASSWORD=...
 ./gradlew :app:assembleRelease
 ```
 
-Without those values Gradle still builds `app-release-unsigned.apk` for local
-verification, but that artifact is not publishable.
+Release builds fail without those values so an unsigned APK is not mistaken for
+a publishable artifact. For local-only unsigned verification, opt in explicitly:
+
+```bash
+CLIPLINK_ALLOW_UNSIGNED_RELEASE=true ./gradlew :app:assembleRelease
+```
 
 Instrumentation tests require a connected device or emulator:
 
